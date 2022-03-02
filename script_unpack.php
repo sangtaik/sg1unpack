@@ -1,6 +1,6 @@
 <?php
 
-$fd = fopen('SCRIPT.PAK', 'rb');
+$fd = fopen('/data/SCRIPT.PAK', 'rb');
 
 list($junk, $file_count) = unpack('N*', fread($fd, 4));
 
