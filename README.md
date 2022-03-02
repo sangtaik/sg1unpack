@@ -5,7 +5,7 @@
 The code create by sangtaik on 2022.02.24
 It was re-created based on the contents analyzed by D.
 
-I found code what D was upload. but it is not worked because array * int errors 
+I found code what D was upload. but it is not worked because "array * int errors"
 And I checked Sega Seturn Script file is not use file size pattern.
 only divided by 0x800 offset each characters message script.
 I fix the code and it was worked PHP 8 version
