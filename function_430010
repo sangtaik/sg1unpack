@@ -1,0 +1,108 @@
+// Address range: 0x430010 - 0x4300b0
+
+// a1, a2, a3, a4 is array
+// a[0], a[1], a[2], a[3]
+int32_t function_430010(int32_t * a1, int32_t a2, int32_t a3, int32_t * a4) {
+    int32_t v1 = __readfsdword(0); // bp-12, 0x43001d
+    __writefsdword(0, (int32_t)&v1);
+    
+    int32_t v2 = (int32_t)a4; // bp-28, 0x430046
+    
+    
+    int32_t v3 = function_442f7c(260); // 0x43005f
+    
+    # 이 함수가 핵심으로 생각됨
+    function_434d48(v3, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509);
+    
+    # 어떤 값을 반환하는지 알 수 없으나 -1인 경우 값이 고정
+    # length 관련, 메시지 연관 함수로 추정
+    function_442fcb(-1);
+    
+    
+    function_442981((int32_t)&v2);
+    v2 = 1;
+    function_442c0c();
+    int32_t v4; // 0x430010
+    __writefsdword(0, v4);
+    
+    return 1;
+}
+
+// Address range: 0x442f7c - 0x442fcb
+int32_t function_442f7c(int32_t a1) {
+    # 260 - 12 = ? 인가 아니면 a[3]을 의미하는가?
+    
+    # v1은 a1의 값 범위를 체크하는 변수
+    int32_t v1 = a1 - 12; // 0x442f86
+    int32_t result; // 0x442f7c
+    
+    # 만일 v1이 0이거나 음수 값이면
+    if (*(int32_t *)v1 <= 1) {
+        // 0x442f8f
+        result = a1;
+        if (*(int32_t *)(a1 - 4) >= a1) {
+            // 0x442fc4
+            return result;
+        }
+    }
+    # v2 = a[2]
+    int32_t v2 = *(int32_t *)(a1 - 8); // 0x442f95
+    
+    # v2가 a1보다 크면 v2, 작거나 같으면 a1으로 교체
+    function_442a79(v2 > a1 ? v2 : a1);
+    
+
+    int32_t v3; // 0x442f7c
+    
+    # v2 + 1 < 4는 참이어야 한다. 즉 v2 값은 0~2 값으로 추정된다.
+    function_435120(v3, a1, v2 + 1);
+    *(int32_t *)(v3 - 8) = v2;
+    
+    # v1 값이 감소되며, 그 값이 쓰레드에 잘 보호되는지 확인
+    function_442b74(v1);
+    // 0x442fc4
+    return result;
+}
+
+
+// Address range: 0x442b74 - 0x442b97
+# 인자 값이 감소되며, 그 값이 쓰레드에 잘 보호되는지 확인
+int32_t function_442b74(int32_t lpAddend) {
+    // 0x442b74
+    int32_t result; // 0x442b74
+    if ((int32_t)g584 == lpAddend) {
+        // 0x442b93
+        return result;
+    }
+    # 한 쓰레드가 변수를 감소시키는 동안에 다른 쓰레드가 끼어 들지 않게 해서, 진짜 원하는 대로 1만 증가
+    int32_t v1 = InterlockedDecrement((int32_t *)lpAddend); // 0x442b82
+    
+    result = v1;
+    
+    # 뭔가 오류가 발생, 다른 쓰레드가 끼어들어 문제가 발생하거나 등등....
+    if (v1 >= 0 != v1 != 0) {
+        // 0x442b8c
+        result = function_442afb();
+    }
+    // 0x442b93
+    return result;
+}
+
+// Address range: 0x442981 - 0x4429b4
+int32_t function_442981(int32_t a1) {
+    int32_t * v1 = (int32_t *)a1; // 0x442988
+    int32_t v2 = *v1; // 0x442988
+    int32_t * lpAddend = (int32_t *)(v2 - 12); // 0x44298a
+    int32_t result; // 0x442981
+    if (*lpAddend < 0) {
+        // 0x44299e
+        *(int32_t *)result = (int32_t)g583;
+        function_442d49(*v1);
+    } else {
+        // 0x442990
+        *(int32_t *)result = v2;
+        InterlockedIncrement(lpAddend);
+    }
+    // 0x4429ae
+    return result;
+}
