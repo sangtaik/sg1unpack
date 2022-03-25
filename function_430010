@@ -1,5 +1,27 @@
-// Address range: 0x430010 - 0x4300b0
 
+# FS 세그먼트의 시작 부분을 기준으로 오프셋으로 지정된 위치에 메모리를 씁니다.
+# __writefsdword(offset, 쓸 데이터)
+__writefsdword(0, v1);
+
+
+공통 조사
+g1043 -> function_424df0(a1) g730
+g1044 # X 해상도 값
+g1045 # Y 해상도 값
+g1046 # X 해상도 값
+g1047 # Y 해상도 값
+function_424d60 해상도 관련 설정 함수로 추정
+
+int32_t v7 = function_413b80(3, 1); // 0x40ea14
+
+# 뭔가 파일을 찾는 함수
+function_432b68(찾는 파일)
+
+----------------------------
+
+
+
+// Address range: 0x430010 - 0x4300b0
 // a1, a2, a3, a4 is array
 // a[0], a[1], a[2], a[3]
 int32_t function_430010(int32_t * a1, int32_t a2, int32_t a3, int32_t * a4) {
@@ -11,7 +33,7 @@ int32_t function_430010(int32_t * a1, int32_t a2, int32_t a3, int32_t * a4) {
     
     int32_t v3 = function_442f7c(260); // 0x43005f
     
-    # 이 함수가 핵심으로 생각됨
+    # 이 함수가 핵심으로 생각됨, 뭔가 문자열을 처리하는 함수로 추측됨
     function_434d48(v3, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509);
     
     # 어떤 값을 반환하는지 알 수 없으나 -1인 경우 값이 고정
@@ -19,8 +41,11 @@ int32_t function_430010(int32_t * a1, int32_t a2, int32_t a3, int32_t * a4) {
     function_442fcb(-1);
     
     
+    # 뭔가 파일을 처리할 때 필요한 문자열의 주소값을 반환하는 것으로 추정
     function_442981((int32_t)&v2);
     v2 = 1;
+    
+    # 최종?
     function_442c0c();
     int32_t v4; // 0x430010
     __writefsdword(0, v4);
@@ -28,6 +53,7 @@ int32_t function_430010(int32_t * a1, int32_t a2, int32_t a3, int32_t * a4) {
     return 1;
 }
 
+# 430010_function_442f7c
 // Address range: 0x442f7c - 0x442fcb
 int32_t function_442f7c(int32_t a1) {
     # 260 - 12 = ? 인가 아니면 a[3]을 의미하는가?
@@ -65,6 +91,149 @@ int32_t function_442f7c(int32_t a1) {
 }
 
 
+# 이 함수가 핵심으로 생각됨, 문자열을 처리하는 함수로 추측된다.
+# 430010_function_434d48
+# v3 = function_442f7c(260)의 return 값
+# a5 == 0 인 경우 0를 반환한다.
+# function_434d48(v3, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509);
+// Address range: 0x434d48 - 0x434dd9
+int32_t function_434d48(int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5) {
+    int32_t v1 = a1; // 0x434d51
+    if (a2 != 0) {
+        char v2 = *(char *)a2; // 0x434d53
+        v1 = a1;
+        if (v2 != 0) {
+            // 0x434d59
+            *(char *)a1 = v2;
+            *(char *)(a1 + 1) = 58;
+            v1 = a1 + 2;
+        }
+    }
+    int32_t v3 = v1; // 0x434d6f
+    if (a3 == 0) {
+        goto lab_0x434d99;
+    } else {
+        char v4 = *(char *)a3; // 0x434d71
+        v3 = v1;
+        if (v4 == 0) {
+            goto lab_0x434d99;
+        } else {
+            int32_t v5 = v1;
+            *(char *)v5 = v4;
+            int32_t v6 = a3 + 1; // 0x434d79
+            char v7 = *(char *)v6; // 0x434d79
+            int32_t v8 = v5 + 1; // 0x434d7c
+            int32_t v9 = v6; // 0x434d80
+            while (v7 != 0) {
+                // 0x434d77
+                v5 = v8;
+                *(char *)v5 = v7;
+                v6 = v9 + 1;
+                v7 = *(char *)v6;
+                v8 = v5 + 1;
+                v9 = v6;
+            }
+            
+            # function_4370f0의 동작
+            # a3 >= v6이면 return 0, v6 = a3+1로 선언, v7 != 0이면 v6은 a3+1+1이 된다.
+            # g1437 = 0 이면, v6 - 1 값을 반환한다.
+            # v6 -1 주소값에 해당되는 문자열이 + g1440값 그리고 & 4 연산을 해서... != 0 조건을 만족하면 a2 -2 값을 반환 (무슨 의미인지 잘 모르겠네요.)
+            # 위 3가지 조건이 아니라면 -1 - (v6 - ((v6 -1) & 1) + v6 값을 반환 (역시 무슨 소리인지 모르겠다.)
+            char v10 = *(char *)function_4370f0(a3, v6); // 0x434d89
+            v3 = v8;
+            
+            # a3 >= v6이 되어, v10이 0 값이 되면 v10은 default로 v8 = 92 값을 가지며,
+                # v3 값이 v5 + 2값이 된다.
+            # v10 = 47이거나 92인 것이 그리 중요한 것인가? 어떤 의미를 지니고 있는 것인가?
+            switch (v10) {
+                case 47: {
+                    goto lab_0x434d99;
+                }
+                case 92: {
+                    goto lab_0x434d99;
+                }
+                default: {
+                    // 0x434d95
+                    *(char *)v8 = 92;
+                    v3 = v5 + 2;
+                    goto lab_0x434d99;
+                }
+            }
+        }
+    }
+    
+  #   a5 == 0 인 경우 0를 반환한다.
+  lab_0x434d99:
+    int32_t v11 = v3; // 0x434da0
+    if (a4 != 0) {
+        char v12 = *(char *)a4; // 0x434da2
+        v11 = v3;
+        
+        # 문자열이 있으면
+        if (v12 != 0) {
+            *(char *)v3 = v12;
+            int32_t v13 = a4 + 1; // 0x434daa
+            char v14 = *(char *)v13; // 0x434daa
+            int32_t v15 = v3 + 1; // 0x434dad
+            int32_t v16 = v15; // 0x434da6
+            int32_t v17 = v13; // 0x434da6
+            v11 = v15;
+            
+            # v14의 문자열의 끝까지 loop를 돌린다.
+            while (v14 != 0) {
+                // 0x434da8
+                *(char *)v16 = v14;
+                v13 = v17 + 1;
+                v14 = *(char *)v13;
+                v15 = v16 + 1;
+                v16 = v15;
+                v17 = v13;
+                v11 = v15;
+            }
+        }
+    }
+    // 0x434db1
+    if (a5 == 0) {
+        // 0x434dd3
+        *(char *)v11 = 0;
+        // 0x434dd6
+        return 0;
+    }
+    int32_t v18 = v11; // 0x434d48
+    int32_t v19; // 0x434d48
+    switch (*(char *)a5) {
+        default: {
+            // 0x434dc3
+            *(char *)v11 = 46;
+            v18 = v11 + 1;
+        }
+        case 0: {
+        }
+        case 46: {
+            // 0x434dc7
+            v19 = v18;
+            // break -> 0x434dc7
+            break;
+        }
+    }
+    char v20 = *(char *)a5; // 0x434dc7
+    *(char *)v19 = v20;
+    int32_t result = a5 + 1; // 0x434dcc
+    int32_t v21 = result; // 0x434dcf
+    v19++;
+    while (v20 != 0) {
+        // 0x434dc7
+        v20 = *(char *)v21;
+        *(char *)v19 = v20;
+        result = v21 + 1;
+        v21 = result;
+        v19++;
+    }
+    // 0x434dd6
+    return result;
+}
+
+
 // Address range: 0x442b74 - 0x442b97
 # 인자 값이 감소되며, 그 값이 쓰레드에 잘 보호되는지 확인
 int32_t function_442b74(int32_t lpAddend) {
@@ -88,12 +257,17 @@ int32_t function_442b74(int32_t lpAddend) {
     return result;
 }
 
+# 뭔가 파일을 처리할 때 필요한 문자열의 주소값을 반환하는 것으로 추정
+# 430010_function_442981
 // Address range: 0x442981 - 0x4429b4
 int32_t function_442981(int32_t a1) {
     int32_t * v1 = (int32_t *)a1; // 0x442988
     int32_t v2 = *v1; // 0x442988
     int32_t * lpAddend = (int32_t *)(v2 - 12); // 0x44298a
     int32_t result; // 0x442981
+    
+    # lpAddend값이 0 미만이면 결과는  g583 = "$\xc6G"를 반환
+    # lpAddend값이 0 이상이면 결과는 v2를 반환하고 lpAddend 값을 증가
     if (*lpAddend < 0) {
         // 0x44299e
         *(int32_t *)result = (int32_t)g583;
@@ -105,4 +279,390 @@ int32_t function_442981(int32_t a1) {
     }
     // 0x4429ae
     return result;
+}
+
+# 430010_function_442c0c
+# lpAddend == g584 이면, 함수는 바로 종료
+# lpAddend != g584 이면 lpAddend는 감소 
+// Address range: 0x442c0c - 0x442c36
+int32_t function_442c0c(void) {
+    // 0x442c0c
+    int32_t v1; // 0x442c0c
+    int32_t lpAddend = v1 - 12; // 0x442c11
+    int32_t result; // 0x442c0c
+    if (lpAddend == (int32_t)g584) {
+        // 0x442c34
+        return result;
+    }
+    int32_t v2 = InterlockedDecrement((int32_t *)lpAddend); // 0x442c20
+    result = v2;
+    
+    # v2가 0이 아니라면 
+    if (v2 >= 0 != v2 != 0) {
+        // 0x442c2a
+        result = function_442afb();
+    }
+    // 0x442c34
+    return result;
+}
+
+# 
+# 430010_function_442c0c_function_442afb
+// Address range: 0x442afb - 0x442b43
+int32_t function_442afb(void) {
+    // 0x442afb
+    int32_t v1; // 0x442afb
+    int32_t v2 = *(int32_t *)(v1 + 8); // 0x442afb
+    if (v2 == 64 || v2 == 128) {
+        // 0x442b09
+        
+        # 무슨 함수?
+        # 크리티컬 세션을 들어갔다 나왔다하면서 뭔가 v1 값을 변경한다.
+        return function_43360b(v1);
+    }
+    if (v2 != 256 && v2 != 512) {
+        // 0x442b3c
+        
+        # function_434b1d(v1)
+        # v1 == 0이면 함수를 바로 종료한다.
+        # heap 메모리 값을 해제한다.
+        return function_447941(v1);
+    }
+    // 0x442b09
+    return function_43360b(v1);
+}
+
+# 무슨 함수? 크리티컬 세션을 들어갔다 나왔다 하는데?
+# a1이 0이면 아무 일도 하지 않는다.
+# 430010_function_442c0c_function_442afb_function_43360b
+// Address range: 0x43360b - 0x433637
+int32_t function_43360b(int32_t a1) {
+    // 0x43360b
+    int32_t result; // 0x43360b
+    if (a1 != 0) {
+        // 0x433617
+        int32_t v1; // 0x43360b
+        struct _RTL_CRITICAL_SECTION * lpCriticalSection = (struct _RTL_CRITICAL_SECTION *)(v1 + 16); // 0x43361b
+        EnterCriticalSection(lpCriticalSection);
+        int32_t * v2 = (int32_t *)(v1 + 12); // 0x433622
+        *(int32_t *)a1 = *v2;
+        *v2 = a1;
+        LeaveCriticalSection(lpCriticalSection);
+        result = &g1509;
+    }
+    // 0x433632
+    return result;
+}
+
+# g1431에 해당되는 Heap을 해제하고, 성공하면 0이상을 반환, 실패하면 0을 반환
+# 430010_function_442c0c_function_442afb_function_43360b_function_434b1d
+// Address range: 0x434b1d - 0x434b65
+int32_t function_434b1d(int32_t lpMem) {
+    if (lpMem == 0) {
+        // 0x434b63
+        int32_t result; // 0x434b1d
+        return result;
+    }
+    // 0x434b26
+    
+    # 이건 뭘까? 뭔가 재귀함수로 보인다. 메모리도 할당한다. 크리티컬 세션도 들어간다.
+    function_43851a(9);
+    
+    
+    # g1429가 0이거나 - 값이면 바로 종료
+    # g1430 + 20씩 증가
+    int32_t v1 = function_43b66b(lpMem); // 0x434b2e
+    if (v1 != 0) {
+        // 0x434b39
+        
+        # 핵심 함수, 파일의 메모리 간격을 읽음
+        function_43b696(v1, lpMem);
+        return function_43857b(9);
+    }
+    // 0x434b4c
+    function_43857b(9);
+    // 0x434b63
+    
+    # 동적으로 할당된 heap 메모리를 해제한다.
+    # 예시) HeapFree(HANDLE hHeap, 0, int dwBytes)
+    # dwBytes은 할당할 바이트 수입니다.
+    # hHeap 매개변수로 지정된 힙 이 "성장할 수 없는" 힙인 경우 dwBytes 는 0x7FFF8보다 작아야 합니다. 0이 아닌 값으로 HeapCreate 함수를 호출하여 확장할 수 없는 힙을 만듭니다;
+    return HeapFree((int32_t *)g1431, 0, (int32_t *)lpMem);
+}
+
+# 이건 뭘까? 뭔가 재귀함수로 보인다. 메모리도 할당한다. 크리티컬 세션도 들어간다.
+# 430010_function_442c0c_function_442afb_function_43360b_function_434b1d_function_43851a
+// Address range: 0x43851a - 0x43857b
+int32_t function_43851a(int32_t a1) {
+    int32_t * v1 = (int32_t *)(4 * a1 + (int32_t)&g616); // 0x438521
+    int32_t v2 = *v1; // 0x438521
+    if (v2 != 0) {
+        // 0x438570
+        int32_t v3; // bp-8, 0x43851a
+        *(int32_t *)((int32_t)&v3 - 4) = v2;
+        EnterCriticalSection((struct _RTL_CRITICAL_SECTION *)&g1509);
+        return &g1509;
+    }
+    struct _RTL_CRITICAL_SECTION * v4 = (struct _RTL_CRITICAL_SECTION *)24; // bp-16, 0x438533
+    int32_t * lpCriticalSection = _malloc(24); // 0x438535
+    if (lpCriticalSection == NULL) {
+        // 0x438541
+        v4 = (struct _RTL_CRITICAL_SECTION *)17;
+        __amsg_exit();
+    }
+    int32_t v5 = (int32_t)lpCriticalSection; // 0x438535
+    v4 = (struct _RTL_CRITICAL_SECTION *)17;
+    function_43851a(17);
+    v4 = (struct _RTL_CRITICAL_SECTION *)lpCriticalSection;
+    int32_t v6; // 0x43851a
+    if (*v1 != 0) {
+        // 0x438561
+        function_434b1d(v5);
+        int32_t v7; // bp-12, 0x43851a
+        v6 = &v7;
+    } else {
+        // 0x438557
+        InitializeCriticalSection((struct _RTL_CRITICAL_SECTION *)lpCriticalSection);
+        *v1 = v5;
+        v6 = (int32_t)&v4;
+    }
+    // 0x438567
+    *(int32_t *)(v6 - 4) = 17;
+    function_43857b((int32_t)&g1509);
+    // 0x438570
+    *(int32_t *)v6 = *v1;
+    EnterCriticalSection((struct _RTL_CRITICAL_SECTION *)&g1509);
+    return &g1509;
+}
+
+# 430010_function_442c0c_function_442afb_function_43360b_function_434b1d_function_43b696
+# 아주 중요한 함수, 뭔가 파일의 간격을 읽는 듯한 느낌....
+# g1428의 값이 설정되는 중요한 함수, 이 함수에서 g1428은 16bypte 또는 32byte씩 이동하는 것 같다.
+# function_43b696(v1, lpMem)이면 v1은 메모리 주소, lpMem 역시 메모리 주소
+// Address range: 0x43b696 - 0x43b9c1
+int32_t function_43b696(int32_t a1, int32_t a2) {
+    int32_t v1 = *(int32_t *)(a1 + 16); // 0x43b6a4
+    int32_t v2 = a2 - 4; // 0x43b6ac
+    int32_t v3 = *(int32_t *)v2; // 0x43b6ac
+    int32_t v4 = (a2 - *(int32_t *)(a1 + 12)) / 0x8000; // 0x43b6b3
+    int32_t v5 = *(int32_t *)(a2 - 8); // 0x43b6b8
+    int32_t v6 = v3 - 1; // 0x43b6c1
+    int32_t v7 = *(int32_t *)(v6 + v2); // 0x43b6d2
+    int32_t v8 = v6; // 0x43b6db
+    if ((v7 & 1) == 0) {
+        int32_t v9 = v3 + v2;
+        int32_t * v10 = (int32_t *)(v9 + 3); // 0x43b6ee
+        int32_t * v11 = (int32_t *)(v9 + 7); // 0x43b6f2
+        if (*v10 == *v11) {
+            uint32_t v12 = v7 / 16 - 1; // 0x43b6e2
+            uint32_t v13 = v12 < 63 ? v12 : 63;
+            int32_t v14 = v1 + 4 + v13;
+            int32_t v15 = -1 - (0x80000000 >> (v13 & 31));
+            int32_t v16 = 4 * v4;
+            if (v13 >= 32) {
+                int32_t * v17 = (int32_t *)(v1 + 196 + v16); // 0x43b72f
+                *v17 = *v17 & v15;
+                char * v18 = (char *)v14; // 0x43b736
+                char v19 = *v18 - 1; // 0x43b736
+                *v18 = v19;
+                if (v19 == 0) {
+                    int32_t * v20 = (int32_t *)(a1 + 4); // 0x43b73d
+                    *v20 = *v20 & v15;
+                }
+            } else {
+                int32_t * v21 = (int32_t *)(v1 + 68 + v16); // 0x43b70d
+                *v21 = *v21 & v15;
+                char * v22 = (char *)v14; // 0x43b711
+                char v23 = *v22 - 1; // 0x43b711
+                *v22 = v23;
+                if (v23 == 0) {
+                    int32_t * v24 = (int32_t *)a1; // 0x43b718
+                    *v24 = *v24 & v15;
+                }
+            }
+        }
+        // 0x43b740
+        *(int32_t *)(*v11 + 4) = *v10;
+        *(int32_t *)(*v10 + 8) = *v11;
+        v8 = v7 + v6;
+    }
+    int32_t result = v1 + 324 + 516 * v4; // 0x43b6c5
+    int32_t v25; // 0x43b696
+    int32_t v26; // 0x43b696
+    int32_t v27; // 0x43b696
+    int32_t v28; // 0x43b696
+    int32_t v29; // 0x43b696
+    int32_t * v30; // 0x43b696
+    int32_t * v31; // 0x43b696
+    if ((v5 & 1) != 0) {
+        uint32_t v32 = v8 / 16 - 1; // 0x43b761
+        v31 = (int32_t *)(a2 + 4);
+        v30 = (int32_t *)a2;
+        v25 = v32 < 63 ? v32 : 63;
+        v26 = v2;
+        v28 = v8;
+        goto lab_0x43b828;
+    } else {
+        int32_t v33 = v2 - v5; // 0x43b779
+        uint32_t v34 = v5 / 16 - 1; // 0x43b787
+        uint32_t v35 = v34 < 63 ? v34 : 63;
+        int32_t v36 = v8 + v5; // 0x43b795
+        uint32_t v37 = v36 / 16 - 1; // 0x43b7a0
+        int32_t v38 = v37 < 63 ? v37 : 63;
+        v27 = v33;
+        v29 = v36;
+        if (v35 == v38) {
+            goto lab_0x43b8b1;
+        } else {
+            // 0x43b7ab
+            v30 = (int32_t *)(v33 + 4);
+            v31 = (int32_t *)(v33 + 8);
+            if (*v30 == *v31) {
+                uint32_t v39 = v35 & 31;
+                if (v35 >= 32) {
+                    int32_t v40 = -1 - (0x80000000 >> v39);
+                    int32_t * v41 = (int32_t *)(v1 + 196 + 4 * v4); // 0x43b7ed
+                    *v41 = *v41 & v40;
+                    char * v42 = (char *)(v1 + 4 + v35); // 0x43b7f4
+                    char v43 = *v42 - 1; // 0x43b7f4
+                    *v42 = v43;
+                    if (v43 == 0) {
+                        int32_t * v44 = (int32_t *)(a1 + 4); // 0x43b7fb
+                        *v44 = *v44 & v40;
+                    }
+                } else {
+                    int32_t v45 = v39 == 0 ? 0x7fffffff : -1 - (0x80000000 >> v39);
+                    int32_t * v46 = (int32_t *)(v1 + 68 + 4 * v4); // 0x43b7cb
+                    *v46 = *v46 & v45;
+                    char * v47 = (char *)(v1 + 4 + v35); // 0x43b7cf
+                    char v48 = *v47 - 1; // 0x43b7cf
+                    *v47 = v48;
+                    if (v48 == 0) {
+                        int32_t * v49 = (int32_t *)a1; // 0x43b7d6
+                        *v49 = *v49 & v45;
+                    }
+                }
+            }
+            // 0x43b819
+            *(int32_t *)(*v31 + 4) = *v30;
+            *(int32_t *)(*v30 + 8) = *v31;
+            v25 = v38;
+            v26 = v33;
+            v28 = v36;
+            goto lab_0x43b828;
+        }
+    }
+  lab_0x43b828:;
+    int32_t v50 = 8 * v25 + result; // 0x43b82b
+    int32_t * v51 = (int32_t *)(v50 + 4); // 0x43b82e
+    *v30 = *v51;
+    *v31 = v50;
+    *v51 = v26;
+    *(int32_t *)(*v30 + 8) = v26;
+    v27 = v26;
+    v29 = v28;
+    if (*v30 == *v31) {
+        char * v52 = (char *)(v1 + 4 + v25); // 0x43b84e
+        char v53 = *v52; // 0x43b84e
+        *v52 = v53 + 1;
+        int32_t v54 = 0x80000000 >> (v25 & 31);
+        if (v25 >= 32) {
+            if (v53 == 0) {
+                int32_t * v55 = (int32_t *)(a1 + 4); // 0x43b898
+                *v55 = *v55 | v54;
+            }
+            int32_t * v56 = (int32_t *)(v1 + 196 + 4 * v4); // 0x43b8ac
+            *v56 = *v56 | v54;
+            v27 = v26;
+            v29 = v28;
+        } else {
+            if (v53 == 0) {
+                int32_t * v57 = (int32_t *)a1; // 0x43b872
+                *v57 = *v57 | v54;
+            }
+            int32_t * v58 = (int32_t *)(v1 + 68 + 4 * v4); // 0x43b881
+            *v58 = *v58 | v54;
+            v27 = v26;
+            v29 = v28;
+        }
+    }
+    goto lab_0x43b8b1;
+  lab_0x43b8b1:;
+    int32_t v59 = v29;
+    *(int32_t *)v27 = v59;
+    *(int32_t *)(v27 - 4 + v59) = v59;
+    int32_t * v60 = (int32_t *)result; // 0x43b8ba
+    int32_t v61 = *v60 - 1; // 0x43b8ba
+    *v60 = v61;
+    if (v61 != 0) {
+        // 0x43b9bc
+        return result;
+    }
+    int32_t v62 = g1428; // 0x43b8c2
+    int32_t result2 = a1; // 0x43b8c9
+    if (v62 != 0) {
+        // 0x43b8cf
+        int32_t lpAddress; // bp-36, 0x43b696
+        int32_t v63 = &lpAddress; // 0x43b6b2
+        *(int32_t *)(v63 - 4) = 0x4000;
+        *(int32_t *)(v63 - 8) = 0x8000;
+        *(int32_t *)(v63 - 12) = 0x8000 * g1426 + *(int32_t *)(v62 + 12);
+        int32_t dwSize; // 0x43b696
+        int32_t dwFreeType; // 0x43b696
+        VirtualFree((int32_t *)lpAddress, dwSize, dwFreeType);
+        int32_t * v64 = (int32_t *)(g1428 + 8); // 0x43b901
+        
+        # v64 기준으로 0x80 단위로 잘라냄
+        # http://www.fredosaurus.com/notes-cpp/expressions/bitops.html
+        #int age, gender, height, packed_info;
+
+        #// Pack as AAAAAAA G HHHHHHH using shifts and "or"
+        #packed_info = (age << 8) | (gender << 7) | height;
+
+        #// Unpack with shifts and masking using "and"
+        #height = packed_info & 0x7F;   // This constant is binary ...01111111
+        #gender = (packed_info >> 7) & 1;
+        #age    = (packed_info >> 8);
+        
+        # unpack 작업으로 추측됨
+        *v64 = *v64 | 0x80000000 >> (g1426 & 31);
+        *(int32_t *)(*(int32_t *)(g1428 + 16) + 196 + 4 * g1426) = 0;
+        char * v65 = (char *)(*(int32_t *)(g1428 + 16) + 67); // 0x43b922
+        *v65 = *v65 - 1;
+        int32_t v66 = g1428; // 0x43b925
+        int32_t v67 = v66; // 0x43b931
+        if (*(char *)(*(int32_t *)(v66 + 16) + 67) == 0) {
+            int32_t * v68 = (int32_t *)(v66 + 4); // 0x43b933
+            *v68 = *v68 & -2;
+            v67 = g1428;
+        }
+        // 0x43b93c
+        result2 = a1;
+        if (*(int32_t *)(v67 + 8) == -1) {
+            // 0x43b942
+            
+            # 0x8000 파일의 간격으로 보임 
+            # g1427, g1428, g1429, g1430, g1431는 뭔가 중요한 포인트
+            *(int32_t *)(v63 - 16) = 0x8000;
+            *(int32_t *)(v63 - 20) = 0;
+            *(int32_t *)(v63 - 24) = *(int32_t *)(v67 + 12);
+            VirtualFree(&g1509, (int32_t)&g1509, (int32_t)&g1509);
+            *(int32_t *)(v63 - 28) = *(int32_t *)(g1428 + 16);
+            *(int32_t *)(v63 - 32) = 0;
+            *(int32_t *)(v63 - 36) = g1431;
+            HeapFree(&g1509, (int32_t)&g1509, &g1509);
+            *(int32_t *)(v63 - 40) = 20 * g1429 - 20 + g1430 - g1428;
+            *(int32_t *)(v63 - 44) = g1428 + 20;
+            *(int32_t *)(v63 - 48) = g1428;
+            function_433ce0((int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509);
+            g1429--;
+            g1427 = g1430;
+            result2 = g1428 < a1 ? a1 - 20 : a1;
+        }
+    }
+    // 0x43b9b1
+    g1428 = result2;
+    g1426 = v4;
+    // 0x43b9bc
+    return result2;
 }
