@@ -666,3 +666,43 @@ int32_t function_43b696(int32_t a1, int32_t a2) {
     // 0x43b9bc
     return result2;
 }
+
+
+
+
+
+
+*(int32_t *)(v14 - 4) = 0xcc0020;
+        int32_t v15 = v14 == -20 ? 0 : *(int32_t *)(v14 + 24); // 0x4250dc
+        *(int32_t *)(v14 - 8) = v10;
+        *(int32_t *)(v14 - 12) = 0;
+        *(int32_t *)(v14 - 16) = v15;
+        *(int32_t *)(v14 - 20) = 1;
+        *(int32_t *)(v14 - 24) = *(int32_t *)(v14 + 40);
+        *(int32_t *)(v14 - 28) = v10;
+        *(int32_t *)(v14 - 32) = 0;
+        int32_t v16 = v14 - 36; // 0x4250ec
+        *(int32_t *)v16 = *(int32_t *)(v14 + 64);
+		#이미지를 화면 출력하는 함수 
+		# g1509[0] = HDC hdcDest	, 0xcc0020
+		# g1509[1] = int nXDest		, 0
+			# 이미지를 출력할 위치인 x 좌표입니다.
+		# g1509[2] = int nYDest		, 0
+			# 이미지를 출력할 위치인 y 좌표입니다.
+		# g1509[3] = int nWidth		, ?
+			# 원본 이미지의 너비
+		# g1509[4] = int nHeight	, 1
+			# 원본 이미지의 높이
+		# g1509[5] = HDC hdcDest	, 
+			# hdcSrc 이미지 핸들
+		# g1509[6] = int nXSrc		, 0
+			# 가져올 이미지의 시작지점인 x 좌표입니다, 이 위치부터 nWidth, nHeight만큼 이미지를 잘라옵니다.
+		# g1509[7] = int nYSrc		, 0
+			# 가져올 이미지의 시작지점인 y좌표입니다, 이 위치부터 nHeight만큼 이미지를 잘라옵니다.
+		# g1509[8] = int dwRop	
+			# 이미지의 출력 방법입니다
+        BitBlt(&g1509, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509, &g1509, (int32_t)&g1509, (int32_t)&g1509, (int32_t)&g1509);
+        uint32_t v17 = *(int32_t *)(v14 + 8); // 0x4250f6
+        uint32_t v18 = v9 + (int32_t)((0x100000000 * (int64_t)(v13 >> 31) | (int64_t)v13) / (int64_t)v17); // 0x4250fc
+        uint32_t v19 = function_424c00(); // 0x4250fe
+        int32_t v20 = v16; // 0x425105
